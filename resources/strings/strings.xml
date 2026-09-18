@@ -1,0 +1,7 @@
+<strings>
+    <string id="AppName">PodcastPlayer</string>
+    <string id="fetchingEpisodes">Fetching Episodes</string>
+    <string id="syncMenuTitle">Choose Episodes</string>
+    <string id="playbackMenuTitle">Choose Episodes</string>
+    <string id="noEpisodes">No episodes on\nthe watch</string>
+</strings>

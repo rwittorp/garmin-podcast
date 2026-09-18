@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- Audio Content Provider for podcasts. Targets Forerunner 245 Music (240x240, CIQ 3.3) -->
+<iq:manifest xmlns:iq="http://www.garmin.com/xml/connectiq" version="0">
+    <iq:application entry="PodcastApp" id="a1b2c3d4-e5f6-47ab-8c9d-1234567890ab" launcherIcon="@Drawables.LauncherIcon" minSdkVersion="3.0.0" name="@Strings.AppName" type="audio-content-provider-app">
+        <iq:products>
+            <iq:product id="fr245m"/>
+        </iq:products>
+        <iq:permissions>
+            <iq:uses-permission id="Communications"/>
+        </iq:permissions>
+        <iq:languages>
+            <iq:language>eng</iq:language>
+        </iq:languages>
+    </iq:application>
+</iq:manifest>

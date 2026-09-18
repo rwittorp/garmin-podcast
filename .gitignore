@@ -1,0 +1,5 @@
+bin/
+*.prg
+*.debug.xml
+__pycache__/
+.DS_Store
