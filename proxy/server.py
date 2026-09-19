@@ -108,6 +108,31 @@ def regenerate_episodes_file():
     return len(podcasts), total
 
 
+def search_podcasts(term, limit=8):
+    """Search Apple Podcasts (free, no key) -> [{name, author, feedUrl}]."""
+    from urllib.parse import urlencode
+    url = ("https://itunes.apple.com/search?" + urlencode(
+        {"media": "podcast", "term": term, "limit": limit}))
+    with urllib.request.urlopen(url, timeout=20) as r:
+        data = json.load(r)
+    out = []
+    for item in data.get("results", []):
+        feed = item.get("feedUrl")
+        if not feed:
+            continue
+        out.append({
+            "name": item.get("collectionName") or item.get("trackName") or "Untitled",
+            "author": item.get("artistName", ""),
+            "feedUrl": feed,
+        })
+    return out
+
+
+def slugify(name):
+    slug = re.sub(r"[^a-z0-9]+", "", name.lower().replace(" ", ""))[:12]
+    return slug or "show"
+
+
 ADMIN_CSS = ("body{font-family:sans-serif;max-width:720px;margin:2em auto;"
              "padding:0 1em}table{border-collapse:collapse;width:100%}"
              "td,th{border:1px solid #ccc;padding:.4em;text-align:left}"
@@ -116,7 +141,7 @@ ADMIN_CSS = ("body{font-family:sans-serif;max-width:720px;margin:2em auto;"
              ".row>*{flex:1}.note{color:#555;font-size:.9em}")
 
 
-def admin_page(msg=""):
+def admin_page(msg="", query="", results=None):
     feeds = load_feeds()
     rows = []
     for pid, spec in feeds.items():
@@ -131,6 +156,29 @@ def admin_page(msg=""):
                 feed=html.escape(spec.get("feed", "")),
                 feedshort=html.escape(spec.get("feed", "")[:40]),
                 limit=html.escape(str(spec.get("limit", 10)))))
+    if results:
+        rrows = []
+        for r in results:
+            rrows.append(
+                "<tr><td>{name}<br><span class=\"note\">{author}</span></td>"
+                "<td><form method=\"post\" action=\"/admin/add\">"
+                "<input type=\"hidden\" name=\"name\" value=\"{name}\">"
+                "<input type=\"hidden\" name=\"feed\" value=\"{feed}\">"
+                "<input type=\"text\" name=\"id\" value=\"{slug}\" required "
+                "style=\"width:7em\" title=\"Short id for this show\">"
+                "<input type=\"number\" name=\"limit\" value=\"10\" min=\"1\" "
+                "max=\"500\" style=\"width:4em\" title=\"Episode limit\">"
+                "<button type=\"submit\">Add</button></form></td></tr>".format(
+                    name=html.escape(r["name"]),
+                    author=html.escape(r.get("author", "")),
+                    feed=html.escape(r["feedUrl"]),
+                    slug=html.escape(slugify(r["name"]))))
+        results_html = ("<h3>Search results</h3><table>" + "".join(rrows) +
+                        "</table>")
+    elif query:
+        results_html = "<p class=\"note\">No results with RSS feeds.</p>"
+    else:
+        results_html = ""
     return ("<!doctype html><html><head><meta charset=\"utf-8\">"
             "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
             "<title>Podcast shows</title><style>" + ADMIN_CSS + "</style></head>"
@@ -139,12 +187,16 @@ def admin_page(msg=""):
             "<table><tr><th>ID</th><th>Name</th><th>RSS</th><th>Limit</th>"
             "<th></th></tr>" + "".join(rows) + "</table>"
             "<h2>Add a show</h2>"
+            "<form method=\"get\" action=\"/admin\">"
+            "<div class=\"row\"><input type=\"text\" name=\"q\" placeholder=\"Search podcasts...\" value=\"" + html.escape(query) + "\">"
+            "<button type=\"submit\" style=\"flex:0 0 auto\">Search</button></div></form>"
+            + results_html +
             "<form method=\"post\" action=\"/admin/add\">"
             "<div class=\"row\"><input type=\"text\" name=\"id\" placeholder=\"id (e.g. tvbb)\" required>"
             "<input type=\"text\" name=\"name\" placeholder=\"Display name\" required></div>"
             "<div class=\"row\"><input type=\"url\" name=\"feed\" placeholder=\"https://... RSS URL\" required>"
             "<input type=\"number\" name=\"limit\" value=\"10\" min=\"1\" max=\"500\"></div>"
-            "<button type=\"submit\">Add show</button></form>"
+            "<button type=\"submit\">Add show by URL</button></form>"
             "<h2>Publish</h2>"
             "<form method=\"post\" action=\"/admin/regenerate\">"
             "<button type=\"submit\">Regenerate feed/episodes.json</button></form>"
@@ -193,7 +245,16 @@ class Handler(BaseHTTPRequestHandler):
             _cache.update(at=now, body=body)
             return self._send(body)
         if parts.path == "/admin":
-            return self._send(admin_page(), ctype="text/html")
+            q = parse_qs(parts.query).get("q", [""])[0].strip()
+            results = None
+            if q:
+                try:
+                    results = search_podcasts(q)
+                except Exception as e:  # noqa: BLE001 - show error inline
+                    return self._send(admin_page("Search failed: " + str(e)[:120], query=q),
+                                      ctype="text/html", status=502)
+            return self._send(admin_page(query=q, results=results),
+                              ctype="text/html")
         if parts.path == "/admin/test":
             url = parse_qs(parts.query).get("feed", [None])[0]
             if not url:
