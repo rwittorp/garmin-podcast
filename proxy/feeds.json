@@ -18,5 +18,10 @@
     "name": "Nothing But Respect",
     "feed": "https://rss.art19.com/nothing-but-respect",
     "limit": 10
+  },
+  "onlyifyouget": {
+    "name": "Only If You Get Caught",
+    "feed": "https://publicfeeds.net/f/13062/Only-If-You-Get-Caught",
+    "limit": 10
   }
 }
