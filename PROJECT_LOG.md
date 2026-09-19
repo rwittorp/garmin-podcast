@@ -57,6 +57,10 @@ SDK=$(cat "$HOME/Library/Application Support/Garmin/ConnectIQ/current-sdk.cfg")
 "$SDK/bin/monkeyc" -o bin/PodcastPlayer-fr245m.prg -f monkey.jungle -y ~/garmin-developer-key.der -d fr245m
 # (with ~/.zshrc PATH export: monkeyc ... / monkeydo ... / connectiq)
 
+# Show list (browser UI — localhost only, static Pages can't write files)
+python3 proxy/server.py          # -> http://127.0.0.1:8000/admin
+# add/remove shows, Regenerate, then git commit + push feed/episodes.json
+
 # Simulator
 connectiq                                                      # launch (logs stream here)
 monkeydo /Users/randywittorp/Dev/GarminPodcast/bin/PodcastPlayer-fr245m.prg fr245m

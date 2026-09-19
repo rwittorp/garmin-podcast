@@ -1,29 +1,28 @@
 #!/usr/bin/env python3
-"""Fetch Defector RSS -> static episodes.json for GitHub Pages.
+"""Fetch RSS feeds -> static episodes.json for GitHub Pages.
 
 Run locally:  python3 proxy/fetch.py --out feed/episodes.json
-In CI:         scheduled workflow commits the result daily/hourly.
+In CI:         scheduled workflow commits the result hourly.
+Show list:    proxy/feeds.json (edit via proxy/server.py /admin page).
 """
 import argparse
 import html
 import json
+import os
 import re
 import urllib.request
 import xml.etree.ElementTree as ET
 
-FEED = "https://rss.art19.com/the-distraction"
+# Show list lives in proxy/feeds.json (editable via the /admin page in
+# server.py). Each key becomes the podcast id in episodes.json; the watch
+# shows the podcast picker when more than one entry has episodes.
+FEEDS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "feeds.json")
 
-# Multi-podcast source list. Each key becomes the podcast id in episodes.json.
-# Add new podcasts here as {"name": ..., "feed": ...} — the watch shows the
-# podcast picker when more than one entry has episodes.
-FEEDS = {
-    "defector": {"name": "All Ball", "feed": FEED, "limit": 10},
-    "tvbb": {"name": "Ten Very Big Books",
-             "feed": "https://feeds.transistor.fm/tenverybigbooks",
-             "limit": 200},  # full back catalog (~139 eps, ~35MB each)
-    "ibck": {"name": "If Books Could Kill",
-             "feed": "https://rss.buzzsprout.com/2040953.rss", "limit": 10},
-}
+
+def load_feeds():
+    with open(FEEDS_FILE) as f:
+        return json.load(f)
 
 
 def parse_rss(data, limit):
@@ -74,7 +73,7 @@ def main():
     args = ap.parse_args()
     feeds = {"defector": {"name": "All Ball", "feed": args.feed,
                           "limit": args.limit or 10}} \
-        if args.feed else FEEDS
+        if args.feed else load_feeds()
     podcasts = []
     for pid, spec in feeds.items():
         limit = args.limit or spec.get("limit", 10)

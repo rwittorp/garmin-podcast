@@ -1,0 +1,17 @@
+{
+  "defector": {
+    "name": "All Ball",
+    "feed": "https://rss.art19.com/the-distraction",
+    "limit": 10
+  },
+  "tvbb": {
+    "name": "Ten Very Big Books",
+    "feed": "https://feeds.transistor.fm/tenverybigbooks",
+    "limit": 200
+  },
+  "ibck": {
+    "name": "If Books Could Kill",
+    "feed": "https://rss.buzzsprout.com/2040953.rss",
+    "limit": 10
+  }
+}
