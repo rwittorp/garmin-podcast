@@ -24,11 +24,14 @@ Live feed: https://rwittorp.github.io/garmin-podcast/feed/episodes.json
 - [x] Fix SDK 9.2 build breaks: launcher icon, `Media.SyncDelegate` →
       `Communications.SyncDelegate`, CheckboxMenuItem casts, `typecheck = 0`
 - [x] Simulator: sync-config → sync download (`code=200`) → playback config → playback
-- [x] Real Defector trailer downloads + plays (redirect chain OK)
+- [x] Real Defector trailer downloads + plays (ART19 redirect chain OK)
 - [x] Live JSON episode list from local proxy in sim
 - [x] Cleanup: printlns removed, 40x40 icon, clean build
-- [x] GitHub repo + Pages + hourly feed workflow
-- [ ] On-device test (sideload + Wi-Fi sync + BT headphones)
+- [x] GitHub repo + Pages + hourly feed workflow — feed live at
+      https://rwittorp.github.io/garmin-podcast/feed/episodes.json (verified)
+- [x] Production path proven in sim: Pages HTTPS list renders, strict HTTPS on, no proxy
+- [ ] On-device test — BLOCKED on USB cable (Mac sees no Garmin on USB bus;
+      watch shows power icon only). Retry with Garmin data cable, direct port.
 - [ ] Store publishing
 
 ## Frequent commands
@@ -70,6 +73,27 @@ Push once first (mode menu needs an installed app), then repeat per mode:
 4. **Playback** — controls work; simulator is always silent (normal).
 
 New terminals start in `~` — `cd` to the project or use absolute `.prg` path.
+
+## After a Mac restart
+
+```zsh
+cd /Users/randywittorp/Dev/GarminPodcast
+source ~/.zshrc            # if monkeydo/connectiq not found
+connectiq                  # launch simulator (logs stream here)
+# new terminal:
+cd /Users/randywittorp/Dev/GarminPodcast
+monkeydo /Users/randywittorp/Dev/GarminPodcast/bin/PodcastPlayer-fr245m.prg fr245m
+git -C /Users/randywittorp/Dev/GarminPodcast pull   # pick up anything pushed
+```
+
+## On-device test (pending — needs working data cable)
+
+1. Confirm mount: GARMIN volume in Finder (`diskutil list external`,
+   `system_profiler SPUSBDataType | grep -i garmin`).
+2. Copy: `cp bin/PodcastPlayer-fr245m.prg /Volumes/GARMIN/GARMIN/Apps/` (verify
+   exact Apps path on the mounted volume first with `ls`).
+3. On watch: join Wi-Fi, pair Bluetooth headphones.
+4. Same 4-step flow as sim, starting with the trailer episode (not a 100MB one).
 
 ## Gotchas learned
 
