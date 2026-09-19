@@ -9,7 +9,7 @@ Usage:
     python3 proxy/server.py [--port 8000] [--feed URL] [--limit 10]
 
 Endpoints:
-    GET /episodes           -> {"episodes":[{id,name,url,canSkip,type,length}]}
+    GET /episodes           -> {"podcasts":[{"id","name","episodes":[...]}]}
     GET /episodes?limit=5   -> first N episodes (newest first)
 
 Episode `id` is the ART19 episode UUID (stable across fetches).
@@ -102,7 +102,10 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
             return
-        body = json.dumps({"episodes": eps}).encode()
+        for ep in eps:
+            ep["podcast"] = "All Ball"
+        body = json.dumps({"podcasts": [{"id": "defector", "name": "All Ball",
+                                         "episodes": eps}]}).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))

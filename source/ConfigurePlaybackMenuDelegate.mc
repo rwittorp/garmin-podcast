@@ -1,4 +1,5 @@
 using Toybox.Application;
+using Toybox.Lang;
 using Toybox.Media;
 using Toybox.WatchUi;
 
@@ -10,12 +11,19 @@ class ConfigurePlaybackMenuDelegate extends WatchUi.Menu2InputDelegate {
 
     function onSelect(item) {
         var cb = item as WatchUi.CheckboxMenuItem;
+        var id = cb.getId();
+        // "+ Download more..." shortcut: jump to the episode picker
+        // instead of touching the playlist.
+        if (id instanceof Lang.Dictionary && id.hasKey("downloadMore")) {
+            cb.setChecked(false);
+            WatchUi.pushView(new ConfigureSyncView(), null, WatchUi.SLIDE_IMMEDIATE);
+            return;
+        }
         var app = Application.getApp();
         var playlist = app.getProperty(Properties.PLAYLIST);
         if (playlist == null) {
             playlist = [];
         }
-        var id = cb.getId();
         if (cb.isChecked()) {
             if (playlist.indexOf(id) == -1) {
                 playlist.add(id);

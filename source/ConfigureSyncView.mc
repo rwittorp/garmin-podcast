@@ -41,13 +41,73 @@ class ConfigureSyncView extends WatchUi.View {
     }
 
     function onEpisodeList(responseCode, data) {
-        var catalog;
-        if (responseCode == 200 && data != null && data.hasKey("episodes")) {
-            catalog = data["episodes"];
+        var podcasts = normalizePodcasts(responseCode, data);
+        if (podcasts.size() == 1) {
+            pushSyncMenu(podcasts[0].get("episodes"));
         } else {
-            catalog = Episodes.CATALOG;
+            pushPodcastMenu(podcasts);
         }
-        pushSyncMenu(catalog);
+    }
+
+    // Normalize all feed shapes to [{ "id", "name", "episodes" }].
+    // New Pages format has "podcasts"; the old flat "episodes" format and
+    // the static fallback catalog are wrapped / grouped into one entry each.
+    function normalizePodcasts(responseCode, data) {
+        if (responseCode == 200 && data != null) {
+            if (data.hasKey("podcasts")) {
+                var pods = data["podcasts"];
+                for (var p = 0; p < pods.size(); ++p) {
+                    tagEpisodes(pods[p].get("episodes"), pods[p].get("name"));
+                }
+                return pods;
+            } else if (data.hasKey("episodes")) {
+                var eps = data["episodes"];
+                tagEpisodes(eps, "All Ball");
+                return [{"id" => "defector", "name" => "All Ball", "episodes" => eps}];
+            }
+        }
+        return groupCatalog(Episodes.CATALOG);
+    }
+
+    function tagEpisodes(eps, podcastName) {
+        for (var i = 0; i < eps.size(); ++i) {
+            if (!eps[i].hasKey("podcast")) {
+                eps[i].put("podcast", podcastName);
+            }
+        }
+    }
+
+    // Group the flat static fallback catalog by its "podcast" field.
+    function groupCatalog(catalog) {
+        var order = [];
+        var groups = {};
+        for (var i = 0; i < catalog.size(); ++i) {
+            var ep = catalog[i];
+            var pname = ep.hasKey("podcast") ? ep.get("podcast").toString() : "Podcasts";
+            if (!groups.hasKey(pname)) {
+                groups[pname] = [];
+                order.add(pname);
+            }
+            groups[pname].add(ep);
+        }
+        var pods = [];
+        for (var j = 0; j < order.size(); ++j) {
+            pods.add({"id" => order[j], "name" => order[j], "episodes" => groups[order[j]]});
+        }
+        return pods;
+    }
+
+    function pushPodcastMenu(podcasts) {
+        var menu = new WatchUi.Menu2({:title => Rez.Strings.podcastMenuTitle});
+        for (var i = 0; i < podcasts.size(); ++i) {
+            var count = podcasts[i].get("episodes").size();
+            menu.addItem(new WatchUi.MenuItem(
+                podcasts[i].get("name").toString(),
+                count.toString() + " episodes",
+                podcasts[i].get("id"), {}));
+        }
+        WatchUi.pushView(menu, new ConfigurePodcastMenuDelegate(self, podcasts), WatchUi.SLIDE_IMMEDIATE);
+        mMenuShown = true;
     }
 
     function pushSyncMenu(catalog) {
@@ -82,5 +142,37 @@ class ConfigureSyncView extends WatchUi.View {
         }
         WatchUi.pushView(menu, new ConfigureSyncMenuDelegate(), WatchUi.SLIDE_IMMEDIATE);
         mMenuShown = true;
+    }
+}
+
+// First level of the picker: choose a podcast, then its episodes.
+// Lives in this file so it can reuse ConfigureSyncView.pushSyncMenu.
+class ConfigurePodcastMenuDelegate extends WatchUi.Menu2InputDelegate {
+
+    private var mView;
+    private var mPodcasts;
+
+    function initialize(view, podcasts) {
+        Menu2InputDelegate.initialize();
+        mView = view;
+        mPodcasts = podcasts;
+    }
+
+    function onSelect(item) {
+        var pid = item.getId();
+        for (var i = 0; i < mPodcasts.size(); ++i) {
+            if (mPodcasts[i].get("id").equals(pid)) {
+                mView.pushSyncMenu(mPodcasts[i].get("episodes"));
+                return;
+            }
+        }
+    }
+
+    function onBack() {
+        WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
+    }
+
+    function onDone() {
+        WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
     }
 }

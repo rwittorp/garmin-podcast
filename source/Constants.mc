@@ -9,7 +9,7 @@ module Episodes {
     // since this is plain http://localhost)
     // Production feed (GitHub Pages, updated hourly by Actions):
     const PROVIDER_URL = "https://rwittorp.github.io/garmin-podcast/feed/episodes.json";
-    // Each entry: { "id", "name", "url", "canSkip", "type" }
+    // Each entry: { "id", "name", "url", "canSkip", "type", "podcast" }
     // Keep URLs short; watch Wi-Fi is slow. Start with 1-2 small files for testing.
     const CATALOG = [
         {
@@ -17,21 +17,24 @@ module Episodes {
             "name" => "Sample Ep 1 (3min)",
             "url" => "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
             "canSkip" => true,
-            "type" => "mp3"
+            "type" => "mp3",
+            "podcast" => "Samples"
         },
         {
             "id" => "ep2",
             "name" => "Sample Ep 2 (6min)",
             "url" => "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
             "canSkip" => true,
-            "type" => "mp3"
+            "type" => "mp3",
+            "podcast" => "Samples"
         },
         {
             "id" => "defector-trailer",
             "name" => "All Ball Trailer (2min)",
             "url" => "https://mgln.ai/e/282/pscrb.fm/rss/p/clrtpod.com/m/tracking.swap.fm/track/IVPmvUWSCISCVAzWNnnJ/rss.art19.com/episodes/05831630-b488-4aa4-921b-445a1335ac4c.mp3?rss_browser=BAhJIhJHYXJtaW5Qb2RjYXN0BjoGRVQ%3D--44e2e32b9acf7092a09102cfd433d86887a2c756",
             "canSkip" => true,
-            "type" => "mp3"
+            "type" => "mp3",
+            "podcast" => "All Ball"
         }
     ];
 }
@@ -63,6 +66,7 @@ module SongInfo {
         URL,
         CAN_SKIP,
         ID,
-        TYPE
+        TYPE,
+        PODCAST
     }
 }

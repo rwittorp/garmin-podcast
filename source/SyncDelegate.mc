@@ -67,7 +67,8 @@ class SyncDelegate extends Communications.SyncDelegate {
             var context = {
                 SongInfo.CAN_SKIP => info[SongInfo.CAN_SKIP],
                 SongInfo.ID => ids[0],
-                SongInfo.URL => info[SongInfo.URL]
+                SongInfo.URL => info[SongInfo.URL],
+                SongInfo.PODCAST => info.hasKey(SongInfo.PODCAST) ? info[SongInfo.PODCAST] : ""
             };
             var options = {
                 :method => Communications.HTTP_REQUEST_METHOD_GET,

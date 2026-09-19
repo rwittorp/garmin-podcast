@@ -39,6 +39,12 @@ Live feed: https://rwittorp.github.io/garmin-podcast/feed/episodes.json
       Gotcha fixed: `ConfigureSyncMenuDelegate.onDone()` must call
       `Communications.startSync()` (no-op in sim, required on-device) or the
       app loops on the picker; media sync also wants charger + Wi-Fi.
+- [x] UI: `+ Download more...` shortcut atop the playback menu (pushes
+      `ConfigureSyncView`) — without it, downloaded eps are a dead end.
+      Feed is now multi-podcast: `{"podcasts":[{id,name,episodes}]}` with
+      podcast→episodes picker, `SongInfo.PODCAST` grouping, old flat-format
+      compat kept. NOTE: DOWN during native playback is owned by the system
+      player and can't be remapped — navigation fix lives in our menus.
 - [ ] Store publishing
 
 ## Frequent commands

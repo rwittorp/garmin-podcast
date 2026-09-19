@@ -55,7 +55,8 @@ class ConfigureSyncMenuDelegate extends WatchUi.Menu2InputDelegate {
                 syncInfo[ep["id"]] = {
                     SongInfo.URL => ep["url"],
                     SongInfo.CAN_SKIP => ep["canSkip"],
-                    SongInfo.TYPE => ep["type"]
+                    SongInfo.TYPE => ep["type"],
+                    SongInfo.PODCAST => ep.hasKey("podcast") ? ep["podcast"] : ""
                 };
             }
         }

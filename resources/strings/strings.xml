@@ -3,5 +3,7 @@
     <string id="fetchingEpisodes">Fetching Episodes</string>
     <string id="syncMenuTitle">Choose Episodes</string>
     <string id="playbackMenuTitle">Choose Episodes</string>
+    <string id="downloadMore">+ Download more...</string>
+    <string id="podcastMenuTitle">Choose Podcast</string>
     <string id="noEpisodes">No episodes on\nthe watch</string>
 </strings>
