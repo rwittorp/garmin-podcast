@@ -18,6 +18,8 @@ FEED = "https://rss.art19.com/the-distraction"
 # podcast picker when more than one entry has episodes.
 FEEDS = {
     "defector": {"name": "All Ball", "feed": FEED},
+    "tvbb": {"name": "Ten Very Big Books",
+             "feed": "https://feeds.transistor.fm/tenverybigbooks"},
 }
 
 
