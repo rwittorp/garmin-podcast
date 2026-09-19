@@ -17,11 +17,12 @@ FEED = "https://rss.art19.com/the-distraction"
 # Add new podcasts here as {"name": ..., "feed": ...} — the watch shows the
 # podcast picker when more than one entry has episodes.
 FEEDS = {
-    "defector": {"name": "All Ball", "feed": FEED},
+    "defector": {"name": "All Ball", "feed": FEED, "limit": 10},
     "tvbb": {"name": "Ten Very Big Books",
-             "feed": "https://feeds.transistor.fm/tenverybigbooks"},
+             "feed": "https://feeds.transistor.fm/tenverybigbooks",
+             "limit": 200},  # full back catalog (~139 eps, ~35MB each)
     "ibck": {"name": "If Books Could Kill",
-             "feed": "https://rss.buzzsprout.com/2040953.rss"},
+             "feed": "https://rss.buzzsprout.com/2040953.rss", "limit": 10},
 }
 
 
@@ -67,19 +68,22 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--feed", default=None,
                     help="single RSS URL (overrides FEEDS, id 'defector')")
-    ap.add_argument("--limit", type=int, default=10)
+    ap.add_argument("--limit", type=int, default=None,
+                    help="override per-podcast limits in FEEDS")
     ap.add_argument("--out", default="feed/episodes.json")
     args = ap.parse_args()
-    feeds = {"defector": {"name": "All Ball", "feed": args.feed}} \
+    feeds = {"defector": {"name": "All Ball", "feed": args.feed,
+                          "limit": args.limit or 10}} \
         if args.feed else FEEDS
     podcasts = []
     for pid, spec in feeds.items():
+        limit = args.limit or spec.get("limit", 10)
         try:
             data = fetch_feed(spec["feed"])
         except Exception as e:
             print(f"skip {pid}: {e}")
             continue
-        eps = parse_rss(data, args.limit)
+        eps = parse_rss(data, limit)
         podcasts.append({"id": pid, "name": spec["name"], "episodes": eps})
     with open(args.out, "w") as f:
         json.dump({"podcasts": podcasts}, f)
