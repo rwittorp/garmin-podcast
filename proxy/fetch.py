@@ -20,6 +20,8 @@ FEEDS = {
     "defector": {"name": "All Ball", "feed": FEED},
     "tvbb": {"name": "Ten Very Big Books",
              "feed": "https://feeds.transistor.fm/tenverybigbooks"},
+    "ibck": {"name": "If Books Could Kill",
+             "feed": "https://rss.buzzsprout.com/2040953.rss"},
 }
 
 
