@@ -13,5 +13,10 @@
     "name": "If Books Could Kill",
     "feed": "https://rss.buzzsprout.com/2040953.rss",
     "limit": 10
+  },
+  "nbr": {
+    "name": "Nothing But Respect",
+    "feed": "https://rss.art19.com/nothing-but-respect",
+    "limit": 10
   }
 }
