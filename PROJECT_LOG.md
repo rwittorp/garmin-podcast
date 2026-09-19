@@ -30,8 +30,15 @@ Live feed: https://rwittorp.github.io/garmin-podcast/feed/episodes.json
 - [x] GitHub repo + Pages + hourly feed workflow — feed live at
       https://rwittorp.github.io/garmin-podcast/feed/episodes.json (verified)
 - [x] Production path proven in sim: Pages HTTPS list renders, strict HTTPS on, no proxy
-- [ ] On-device test — BLOCKED on USB cable (Mac sees no Garmin on USB bus;
-      watch shows power icon only). Retry with Garmin data cable, direct port.
+- [x] On-device test — FR245M is MTP (not mass storage); sideload via OpenMTP
+      → `/GARMIN/APPS` (installed 2026-09-19, v3.3.0). `system_profiler` empty
+      on Apple Silicon is misleading — trust `ioreg -p IOUSB` (showed Garmin
+      VID 0x091e / PID 0x4c05). Launch path: Hold DOWN → music → Hold UP →
+      Music Providers → PodcastPlayer (not the app list). 2026-09-19 PASS:
+      trailer + first full episode downloaded over Wi-Fi and playable.
+      Gotcha fixed: `ConfigureSyncMenuDelegate.onDone()` must call
+      `Communications.startSync()` (no-op in sim, required on-device) or the
+      app loops on the picker; media sync also wants charger + Wi-Fi.
 - [ ] Store publishing
 
 ## Frequent commands
@@ -86,14 +93,19 @@ monkeydo /Users/randywittorp/Dev/GarminPodcast/bin/PodcastPlayer-fr245m.prg fr24
 git -C /Users/randywittorp/Dev/GarminPodcast pull   # pick up anything pushed
 ```
 
-## On-device test (pending — needs working data cable)
+## On-device test (pending — FR245M is MTP, Mac needs OpenMTP)
 
-1. Confirm mount: GARMIN volume in Finder (`diskutil list external`,
-   `system_profiler SPUSBDataType | grep -i garmin`).
-2. Copy: `cp bin/PodcastPlayer-fr245m.prg /Volumes/GARMIN/GARMIN/Apps/` (verify
-   exact Apps path on the mounted volume first with `ls`).
-3. On watch: join Wi-Fi, pair Bluetooth headphones.
-4. Same 4-step flow as sim, starting with the trailer episode (not a 100MB one).
+1. Quit Garmin Express fully (menu bar icon too — it locks the MTP device).
+2. Connect with Garmin data cable, direct port. Check USB enumeration
+   (`system_profiler SPUSBDataType | grep -i garmin`) — if nothing appears,
+   it's cable/seating (charge-only cable), not a driver issue. Empty output
+   with nothing plugged in is normal on Apple Silicon.
+3. Open OpenMTP (`/Applications/OpenMTP.app`, installed via
+   `brew install --cask openmtp`) and copy `bin/PodcastPlayer-fr245m.prg`
+   to `/GARMIN/APPS` on the device. No `/Volumes/GARMIN` mount — MTP
+   devices don't mount in Finder.
+4. Eject via OpenMTP, unplug. On watch: join Wi-Fi, pair Bluetooth headphones.
+5. Same 4-step flow as sim, starting with the trailer episode (not a 100MB one).
 
 ## Gotchas learned
 

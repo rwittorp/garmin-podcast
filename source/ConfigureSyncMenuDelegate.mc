@@ -75,7 +75,10 @@ class ConfigureSyncMenuDelegate extends WatchUi.Menu2InputDelegate {
 
         // Standard flow: exit and let the system start sync (via the
         // simulator's Settings > Media Mode > Sync, or the on-device
-        // prompt). Communications.startSync() is a no-op in the simulator.
+        // prompt). Communications.startSync() is a no-op in the simulator
+        // but on-device it prompts the Wi-Fi media sync — without it the
+        // app loops on the picker forever (SYNC_LIST saved, SONGS empty).
+        Communications.startSync();
         WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
     }
 
